@@ -624,25 +624,50 @@ const sorryBtn = document.getElementById('sorry-btn');
 const sorryResponse = document.getElementById('sorry-response');
 let escapeCount = 0, locked = false;
 
-sorryBtn.addEventListener('mouseenter', () => {
+function escapeButton() {
   if (locked) return;
   escapeCount++;
-  if (escapeCount >= 5) { locked = true; sorryBtn.style.transform = ''; return; }
-  const maxX = window.innerWidth  - 200;
-  const maxY = window.innerHeight - 80;
-  const rx = Math.random() * maxX;
-  const ry = Math.random() * maxY;
+  if (escapeCount >= 5) {
+    locked = true;
+    sorryBtn.style.position = '';
+    sorryBtn.style.left = '';
+    sorryBtn.style.top = '';
+    return;
+  }
+  const btnW = sorryBtn.offsetWidth + 20;
+  const btnH = sorryBtn.offsetHeight + 20;
+  const maxX = window.innerWidth  - btnW;
+  const maxY = window.innerHeight - btnH;
+  const rx = Math.max(10, Math.random() * maxX);
+  const ry = Math.max(10, Math.random() * maxY);
   sorryBtn.style.position = 'fixed';
   sorryBtn.style.left = rx + 'px';
   sorryBtn.style.top  = ry + 'px';
   sorryBtn.style.transition = 'left .25s, top .25s';
-});
+  sorryBtn.style.zIndex = '9999';
+}
 
-sorryBtn.addEventListener('click', () => {
-  if (!locked && escapeCount < 5) return;
+function revealResponse() {
   sorryBtn.style.display = 'none';
   sorryResponse.style.display = 'block';
   requestAnimationFrame(() => sorryResponse.classList.add('visible'));
+}
+
+// Desktop
+sorryBtn.addEventListener('mouseenter', escapeButton);
+
+// Mobile — escape on touchstart, allow click only when locked
+sorryBtn.addEventListener('touchstart', (e) => {
+  if (locked) {
+    revealResponse();
+  } else {
+    e.preventDefault(); // stop the tap from triggering click
+    escapeButton();
+  }
+}, { passive: false });
+
+sorryBtn.addEventListener('click', () => {
+  if (locked) revealResponse();
 });
 
 // ── FORGIVE BUTTON ─────────────────────────────────────────
